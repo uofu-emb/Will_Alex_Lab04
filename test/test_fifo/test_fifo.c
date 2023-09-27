@@ -14,8 +14,8 @@ K_THREAD_STACK_DEFINE(supervisor_stack, STACKSIZE);
 struct k_thread worker_threads[THREAD_COUNT];
 K_THREAD_STACK_ARRAY_DEFINE(worker_stacks, THREAD_COUNT, STACKSIZE);
 
-K_MSGQ_DEFINE(request, sizeof(struct request_msg), 32, 4);
-K_MSGQ_DEFINE(response, sizeof(struct request_msg), 32, 4);
+K_MSGQ_DEFINE(request, sizeof(request_msg_t), 32, 4);
+K_MSGQ_DEFINE(response, sizeof(request_msg_t), 32, 4);
 
 void setUp(void)
 {
@@ -50,13 +50,13 @@ void test_full(void)
 {
     printf("Sending messages\n");
     for (int i = 0; i < 32; i++) {
-        struct request_msg data = {};
+        request_msg_t data = {};
         data.input = i;
         k_msgq_put(&request, &data, K_FOREVER);
     }
 
     for (int i = 0; i < 32; i++) {
-        struct request_msg data = {};
+        request_msg_t data = {};
         int res = k_msgq_get(&response, &data, K_MSEC(1000));
         TEST_ASSERT_EQUAL_INT(0, res);
         printf("Got result %d for %d, handled by thread %d\n",
@@ -69,7 +69,7 @@ void test_full(void)
 
 void test_single(void)
 {
-    struct request_msg data = {42, -1, 0};
+    request_msg_t data = {42, -1, 0};
     k_msgq_put(&request, &data, K_FOREVER);
     k_msgq_get(&response, &data, K_FOREVER);
     TEST_ASSERT_EQUAL_INT(data.input, 42);
@@ -80,7 +80,7 @@ void test_single(void)
 
 void test_nothing(void)
 {
-    struct request_msg data = {42, -1, 0};
+    request_msg_t data = {42, -1, 0};
     k_msgq_put(&request, &data, K_FOREVER);
     k_msgq_get(&response, &data, K_FOREVER);
     TEST_ASSERT_EQUAL_INT(data.input, 42);
@@ -91,7 +91,7 @@ void test_nothing(void)
 void test_all_alone(void)
 {
     // Note this test should run with no thread pool.
-    struct request_msg data = {42, -1, 0};
+    request_msg_t data = {42, -1, 0};
     k_msgq_put(&request, &data, K_FOREVER);
     TEST_ASSERT_EQUAL_INT(-EAGAIN, k_msgq_get(&response, &data, K_MSEC(1000)));
 }
