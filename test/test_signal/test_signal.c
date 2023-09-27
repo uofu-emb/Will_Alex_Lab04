@@ -35,6 +35,7 @@ void test_request(void)
     for (int counter = 46; counter < 55; counter++) {
         data.input = counter;
         int result = signal_request_calculate(&request, &response, &data);
+        printf("Semaphore request has %d and Semaphore response has %d\n", k_sem_count_get(&request), k_sem_count_get(&response));
         TEST_ASSERT_EQUAL_INT(0, result);
         TEST_ASSERT_EQUAL_INT(counter+5, data.output);
 	}
@@ -129,5 +130,6 @@ int main (void)
     RUN_TEST(test_noop);
     RUN_TEST(test_out_of_order);
     RUN_TEST(test_noone_home);
+    RUN_TEST(test_request);
     return UNITY_END();
 }
